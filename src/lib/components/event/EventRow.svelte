@@ -23,12 +23,12 @@
 	}
 
 	const severityColors: Record<LogEvent['severity'], string> = {
-		trace: 'bg-neutral-400 dark:bg-neutral-500',
-		debug: 'bg-sky-500',
-		info: 'bg-blue-500',
-		warn: 'bg-amber-500',
-		error: 'bg-red-500',
-		fatal: 'bg-red-700 dark:bg-red-800'
+		trace: 'bg-severity-trace',
+		debug: 'bg-severity-debug',
+		info: 'bg-severity-info',
+		warn: 'bg-severity-warn',
+		error: 'bg-severity-error',
+		fatal: 'bg-severity-fatal'
 	};
 
 	const severityIcons: Record<LogEvent['severity'], typeof Info> = {
@@ -43,9 +43,9 @@
 
 <button
 	type="button"
-	class="w-full text-left px-3 border-b border-neutral-100 dark:border-neutral-700/50 transition-colors {isSelected
-		? 'bg-blue-100 dark:bg-blue-900/30 border-l-4 border-l-blue-500'
-		: 'hover:bg-neutral-50 dark:hover:bg-neutral-700/50'} {densityProp === 'compact'
+	class="w-full text-left px-3 border-b border-border-soft transition-colors {isSelected
+		? 'bg-selected-bg border-l-4 border-l-selected-border'
+		: 'hover:bg-hover-surface'} {densityProp === 'compact'
 		? 'py-1.5 text-sm'
 		: 'py-2'}"
 	onclick={() => selectedEventId.set(event.id)}
@@ -60,10 +60,10 @@
 				{sev}
 			</span>
 		{/each}
-		<span class="shrink-0 text-neutral-500 dark:text-neutral-400 text-xs font-mono">
+		<span class="shrink-0 text-text-faint text-xs font-mono">
 			{formatTime(event.ts)}
 		</span>
-		<span class="shrink-0 font-medium text-neutral-700 dark:text-neutral-300">{event.service}</span>
-		<span class="min-w-0 truncate text-neutral-600 dark:text-neutral-400">{event.message}</span>
+		<span class="shrink-0 font-medium text-text-primary">{event.service}</span>
+		<span class="min-w-0 truncate text-text-muted">{event.message}</span>
 	</div>
 </button>

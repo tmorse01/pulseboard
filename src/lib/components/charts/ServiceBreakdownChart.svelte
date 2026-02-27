@@ -26,34 +26,34 @@
 	const maxErr = $derived(Math.max(1, ...byErrors.map(([, c]) => c)));
 </script>
 
-<div class="rounded border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-2">
-	<h3 class="text-xs font-semibold text-neutral-600 dark:text-neutral-400 mb-2">Top services by volume</h3>
+<div class="rounded border border-border-default bg-surface-2 p-2">
+	<h3 class="text-xs font-semibold text-text-muted mb-2">Top services by volume</h3>
 	<div class="space-y-1.5">
 		{#each byVolume as [svc, count]}
 			<div class="flex items-center gap-2">
-				<span class="w-20 text-xs truncate font-medium" title={svc}>{svc}</span>
-				<div class="flex-1 h-4 rounded bg-neutral-200 dark:bg-neutral-700 overflow-hidden">
+				<span class="w-20 text-xs truncate font-medium text-text-primary" title={svc}>{svc}</span>
+				<div class="flex-1 h-4 rounded bg-bg-subtle overflow-hidden">
 					<div
-						class="h-full bg-blue-500 dark:bg-blue-600 rounded transition-all"
+						class="h-full bg-brand-primary rounded transition-all"
 						style="width: {(count / maxVol) * 100}%"
 					></div>
 				</div>
-				<span class="text-xs text-neutral-500 w-8 text-right">{count}</span>
+				<span class="text-xs text-text-muted w-8 text-right">{count}</span>
 			</div>
 		{/each}
 	</div>
-	<h3 class="text-xs font-semibold text-neutral-600 dark:text-neutral-400 mt-3 mb-2">Top services by errors</h3>
+	<h3 class="text-xs font-semibold text-text-muted mt-3 mb-2">Top services by errors</h3>
 	<div class="space-y-1.5">
 		{#each byErrors as [svc, count]}
 			<div class="flex items-center gap-2">
-				<span class="w-20 text-xs truncate font-medium" title={svc}>{svc}</span>
-				<div class="flex-1 h-4 rounded bg-neutral-200 dark:bg-neutral-700 overflow-hidden">
+				<span class="w-20 text-xs truncate font-medium text-text-primary" title={svc}>{svc}</span>
+				<div class="flex-1 h-4 rounded bg-bg-subtle overflow-hidden">
 					<div
-						class="h-full bg-red-500 dark:bg-red-600 rounded transition-all"
+						class="h-full bg-severity-error rounded transition-all"
 						style="width: {(count / maxErr) * 100}%"
 					></div>
 				</div>
-				<span class="text-xs text-neutral-500 w-8 text-right">{count}</span>
+				<span class="text-xs text-text-muted w-8 text-right">{count}</span>
 			</div>
 		{/each}
 	</div>

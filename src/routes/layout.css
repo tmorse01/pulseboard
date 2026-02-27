@@ -4,15 +4,79 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-	--severity-trace: 148 163 184;
-	--severity-debug: 14 165 233;
-	--severity-info: 59 130 246;
-	--severity-warn: 245 158 11;
-	--severity-error: 239 68 68;
-	--severity-fatal: 185 28 28;
+/* Midnight Signal – default (dark) */
+@theme {
+	/* Foundation */
+	--color-bg-app: #070b0f;
+	--color-bg-subtle: #0a1016;
+	--color-surface-1: #0b121a;
+	--color-surface-2: #0e1722;
+	--color-surface-3: #101c2a;
+	--color-border-default: #1a2a3d;
+	--color-border-soft: #122033;
+
+	/* Typography */
+	--color-text-primary: #e6eef8;
+	--color-text-muted: #a4b4c7;
+	--color-text-faint: #6f879f;
+	--color-text-inverse: #0b121a;
+
+	/* Fonts */
+	--font-sans: Inter, system-ui, sans-serif;
+	--font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+	/* Brand */
+	--color-brand-primary: #76bd22;
+	--color-brand-bright: #9ef01a;
+	--color-brand-teal: #2bd576;
+
+	/* Severity */
+	--color-severity-trace: #475569;
+	--color-severity-debug: #64748b;
+	--color-severity-info: #3b82f6;
+	--color-severity-warn: #f59e0b;
+	--color-severity-error: #f43f5e;
+	--color-severity-fatal: #d946ef;
+
+	/* Data viz */
+	--color-viz-1: #76bd22;
+	--color-viz-2: #2dd4bf;
+	--color-viz-3: #60a5fa;
+	--color-viz-4: #f59e0b;
+	--color-viz-5: #f43f5e;
+	--color-viz-6: #a78bfa;
+
+	/* Interaction */
+	--color-hover-surface: #101c2a;
+	--color-selected-bg: rgb(118 189 34 / 0.08);
+	--color-selected-border: #76bd22;
+	--color-focus-ring: #76bd22;
+	--color-live-pulse: #9ef01a;
 }
 
 .dark {
 	color-scheme: dark;
+}
+
+.light {
+	color-scheme: light;
+	--color-bg-app: #f8fafc;
+	--color-bg-subtle: #f1f5f9;
+	--color-surface-1: #ffffff;
+	--color-surface-2: #ffffff;
+	--color-surface-3: #f8fafc;
+	--color-border-default: #e2e8f0;
+	--color-border-soft: #e2e8f0;
+	--color-text-primary: #0f172a;
+	--color-text-muted: #475569;
+	--color-text-faint: #64748b;
+	--color-text-inverse: #ffffff;
+	--color-hover-surface: #f1f5f9;
+	--color-selected-bg: rgb(118 189 34 / 0.12);
+}
+
+body {
+	font-family: var(--font-sans);
+	background-color: var(--color-bg-app);
+	color: var(--color-text-primary);
 }

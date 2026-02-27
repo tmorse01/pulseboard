@@ -1,79 +1,34 @@
-import type { LogEvent, Severity } from '$lib/types/event.js';
+import type { LogEvent } from '$lib/types/event.js';
+import { createRng } from '$lib/data/logGen/distributions.js';
+import { generateTraceDefs, traceToEvents } from '$lib/data/logGen/traceGenerator.js';
 
-/** Simple seeded LCG for deterministic mock data */
-function createRng(seed: number) {
-	let state = seed;
-	return function next(): number {
-		state = (state * 1664525 + 1013904223) >>> 0;
-		return state / 2 ** 32;
-	};
-}
-
-const SERVICES = ['api', 'worker', 'web', 'db', 'auth', 'cache'] as const;
-const ENVS = ['prod', 'staging', 'dev'] as const;
-const SEVERITIES: Severity[] = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'];
-const MESSAGES = [
-	'Request processed',
-	'Connection established',
-	'Cache miss',
-	'Database query executed',
-	'User login',
-	'Deployment started',
-	'Health check passed',
-	'Rate limit exceeded',
-	'Validation failed',
-	'External API call'
-];
-
-function pick<T>(arr: readonly T[], rng: () => number): T {
-	return arr[Math.floor(rng() * arr.length)];
-}
-
-/** Generate deterministic mock events. */
+/**
+ * Generate deterministic mock events using trace-first generation.
+ * Produces ~count events with trace correlation, service-specific messages, and realistic attrs.
+ * Signature unchanged for backward compatibility with eventStore.
+ */
 export function generateEvents(count: number, startTs: number, seed = 42): LogEvent[] {
-	const rng = createRng(seed);
-	const events: LogEvent[] = [];
-	const traceIds = new Map<number, string>();
-	let spanCounter = 0;
-
-	for (let i = 0; i < count; i++) {
-		const ts = startTs + i * 1000 + Math.floor(rng() * 2000);
-		const service = pick(SERVICES, rng);
-		const env = pick(ENVS, rng);
-		const severity = pick(SEVERITIES, rng);
-		const hasTrace = rng() > 0.3;
-		const traceId = hasTrace
-			? (traceIds.get(i % 10) ?? `trace-${seed}-${i}`)
-			: undefined;
-		if (hasTrace && !traceIds.has(i % 10)) traceIds.set(i % 10, `trace-${seed}-${i}`);
-		const requestId = hasTrace && rng() > 0.5 ? `req-${seed}-${i}` : undefined;
-		const durationMs = rng() > 0.6 ? Math.floor(rng() * 500) : undefined;
-		const userId = rng() > 0.5 ? `user-${Math.floor(rng() * 100)}` : undefined;
-
-		events.push({
-			id: `evt-${seed}-${i}`,
-			ts,
-			severity,
-			service,
-			env,
-			message: pick(MESSAGES, rng),
-			traceId,
-			requestId,
-			durationMs,
-			userId,
-			attrs: {
-				...(spanCounter++ && { spanId: `span-${spanCounter}` }),
-				...(rng() > 0.7 && { host: `host-${Math.floor(rng() * 5)}` })
-			}
-		});
+	const windowEnd = startTs + 24 * 60 * 60 * 1000; // 24h window
+	// Average ~2.5 events per trace; generate enough traces to reach count
+	const numTraces = Math.ceil(count / 2.5) + 50;
+	const traceDefs = generateTraceDefs(numTraces, startTs, windowEnd, seed);
+	const rng = createRng(seed + 1);
+	const eventIdPrefix = `evt-${seed}`;
+	const allEvents: LogEvent[] = [];
+	for (const trace of traceDefs) {
+		allEvents.push(...traceToEvents(trace, eventIdPrefix, rng));
+		if (allEvents.length >= count * 1.2) break; // enough to slice
 	}
-
-	return events.sort((a, b) => a.ts - b.ts);
+	const sorted = allEvents.sort((a, b) => a.ts - b.ts);
+	return sorted.slice(0, count);
 }
 
 let liveTailInterval: ReturnType<typeof setInterval> | null = null;
 
-/** Simulate live tail: call callback with new events at interval. Returns stop function. */
+/**
+ * Simulate live tail: emit 1–3 trace-correlated events per tick using the same
+ * service templates. Returns stop function.
+ */
 export function streamEvents(
 	callback: (event: LogEvent) => void,
 	intervalMs = 2000,
@@ -83,18 +38,23 @@ export function streamEvents(
 	const rng = createRng(seed);
 
 	const tick = () => {
-		const ts = Date.now();
-		const event: LogEvent = {
-			id: `live-${ts}-${counter}`,
-			ts,
-			severity: pick(SEVERITIES, rng),
-			service: pick(SERVICES, rng),
-			env: pick(ENVS, rng),
-			message: pick(MESSAGES, rng),
-			attrs: {}
-		};
-		callback(event);
-		counter++;
+		const now = Date.now();
+		// 1–3 traces per tick (trace-aware burst)
+		const numTraces = 1 + Math.floor(rng() * 3);
+		const windowStart = now - 5000;
+		const traceDefs = generateTraceDefs(numTraces, windowStart, now + 100, seed + counter * 1000);
+		const eventIdPrefix = `live-${now}`;
+		for (const trace of traceDefs) {
+			const events = traceToEvents(trace, eventIdPrefix, rng);
+			for (const ev of events) {
+				callback({
+					...ev,
+					id: `${ev.id}-${counter}`,
+					ts: now + counter
+				});
+				counter++;
+			}
+		}
 	};
 
 	liveTailInterval = setInterval(tick, intervalMs);

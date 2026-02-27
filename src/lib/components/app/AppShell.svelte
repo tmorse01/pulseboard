@@ -1,40 +1,20 @@
 <script lang="ts">
 	import FilterBuilder from '$lib/components/filter/FilterBuilder.svelte';
-	import ActiveFilterChips from '$lib/components/filter/ActiveFilterChips.svelte';
 	import EventStream from '$lib/components/event/EventStream.svelte';
 	import DetailPanel from '$lib/components/event/DetailPanel.svelte';
 	import OverviewCards from '$lib/components/app/OverviewCards.svelte';
 	import TimelineChart from '$lib/components/charts/TimelineChart.svelte';
-	import ServiceBreakdownChart from '$lib/components/charts/ServiceBreakdownChart.svelte';
+	import ServiceSeverityHeatmap from '$lib/components/charts/ServiceSeverityHeatmap.svelte';
+	import ServiceEnvHeatmap from '$lib/components/charts/ServiceEnvHeatmap.svelte';
 	import SavedViews from '$lib/components/filter/SavedViews.svelte';
-	import {
-		theme,
-		density,
-		liveTailPaused,
-		selectedEventId
-	} from '$lib/stores/index.js';
+	import HeaderActionsDropdown from '$lib/components/app/HeaderActionsDropdown.svelte';
+	import { theme, selectedEventId } from '$lib/stores/index.js';
 	import { getResolvedTheme } from '$lib/stores/theme.js';
-	import { Menu } from '@lucide/svelte';
+	import { Menu, Activity } from '@lucide/svelte';
 
 	let themeValue = $derived($theme);
-	let densityValue = $derived($density);
-	let livePaused = $derived($liveTailPaused);
 	let selectedId = $derived($selectedEventId);
 	let sidebarOpen = $state(true);
-
-	function toggleTheme() {
-		const next: 'light' | 'dark' | 'system' =
-			themeValue === 'dark' ? 'light' : themeValue === 'light' ? 'system' : 'dark';
-		theme.set(next);
-	}
-
-	function toggleDensity() {
-		density.set(densityValue === 'comfortable' ? 'compact' : 'comfortable');
-	}
-
-	function toggleLiveTail() {
-		liveTailPaused.set(!livePaused);
-	}
 
 	function applyThemeToDoc() {
 		const resolved = getResolvedTheme(themeValue);
@@ -47,71 +27,50 @@
 	});
 </script>
 
-<div class="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(200px,280px)_minmax(0,1fr)] grid-rows-[auto_1fr] min-h-screen bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100">
+<div
+	class="grid min-h-screen grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr] bg-bg-app text-text-primary lg:grid-cols-[minmax(200px,280px)_minmax(0,1fr)]"
+>
 	<!-- Header -->
 	<header
-		class="col-span-full flex items-center justify-between gap-4 shrink-0 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-1.5"
+		class="col-span-full flex min-h-0 shrink-0 items-center justify-between gap-2 border-b border-border-default bg-surface-1 px-4 py-2"
 	>
-		<div class="flex items-center gap-3">
+		<div class="flex min-w-0 items-center gap-3">
 			<button
 				type="button"
-				class="lg:hidden p-2 rounded hover:bg-neutral-100 dark:hover:bg-neutral-700"
+				class="rounded p-2 hover:bg-hover-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 lg:hidden"
 				aria-label="Toggle sidebar"
 				onclick={() => (sidebarOpen = !sidebarOpen)}
 			>
-				<Menu class="w-5 h-5" aria-hidden="true" />
+				<Menu class="h-5 w-5 shrink-0" aria-hidden="true" />
 			</button>
-			<h1 class="text-lg font-semibold">Pulseboard</h1>
+			<h1 class="flex items-center gap-2 truncate text-lg font-semibold">
+				<Activity class="hidden h-5 w-5 shrink-0 text-text-muted lg:block" aria-hidden="true" />
+				<span>Pulseboard</span>
+			</h1>
 		</div>
-		<div class="flex items-center gap-2">
+		<div class="flex shrink-0 items-center gap-2">
 			<SavedViews />
-			<button
-				type="button"
-				class="px-3 py-1.5 rounded border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-sm"
-				onclick={toggleTheme}
-				aria-label="Toggle theme"
-			>
-				{themeValue === 'dark' ? 'Light' : themeValue === 'light' ? 'System' : 'Dark'}
-			</button>
-			<button
-				type="button"
-				class="px-3 py-1.5 rounded border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-sm"
-				onclick={toggleDensity}
-				aria-label="Toggle density"
-			>
-				{densityValue === 'compact' ? 'Comfortable' : 'Compact'}
-			</button>
-			<button
-				type="button"
-				class="flex items-center gap-2 px-3 py-1.5 rounded border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-sm"
-				onclick={toggleLiveTail}
-				aria-label={livePaused ? 'Resume live tail' : 'Pause live tail'}
-			>
-				<span
-					class="w-2 h-2 rounded-full {livePaused
-						? 'bg-amber-500'
-						: 'bg-emerald-500 animate-pulse'}"
-				></span>
-				{livePaused ? 'Paused' : 'Live'}
-			</button>
+			<HeaderActionsDropdown />
 		</div>
 	</header>
 
 	<!-- Sidebar -->
 	<aside
-		class="hidden lg:block border-r border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 overflow-y-auto {sidebarOpen ? 'lg:flex' : 'lg:hidden'} flex-col w-full lg:w-auto lg:min-w-[200px] lg:max-w-[280px]"
+		class="hidden overflow-y-auto border-r border-border-default bg-surface-1 lg:block {sidebarOpen
+			? 'lg:flex'
+			: 'lg:hidden'} w-full flex-col lg:w-auto lg:max-w-[280px] lg:min-w-[200px]"
 		aria-label="Filters"
 	>
 		<FilterBuilder />
 	</aside>
 	{#if sidebarOpen}
 		<div
-			class="lg:hidden fixed inset-0 z-40 bg-black/50"
+			class="fixed inset-0 z-40 bg-black/50 lg:hidden"
 			aria-hidden="true"
 			onclick={() => (sidebarOpen = false)}
 		></div>
 		<aside
-			class="fixed left-0 top-0 bottom-0 z-50 w-[280px] max-w-[85vw] border-r border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 overflow-y-auto lg:hidden"
+			class="fixed top-0 bottom-0 left-0 z-50 w-[280px] max-w-[85vw] overflow-y-auto border-r border-border-default bg-surface-1 lg:hidden"
 			aria-label="Filters"
 		>
 			<FilterBuilder />
@@ -119,28 +78,41 @@
 	{/if}
 
 	<!-- Main -->
-	<main class="flex flex-col min-h-0 overflow-hidden">
-		<div class="p-2 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/50">
+	<main class="flex min-h-0 flex-col overflow-hidden">
+		<div class="border-b border-border-default bg-bg-subtle p-2">
 			<OverviewCards />
 		</div>
-		<div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-2 p-2 flex-1 min-h-0">
-			<div class="flex flex-col min-h-0">
+		<div
+			class="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr_auto] gap-2 p-2 xl:grid-cols-[1fr_320px] xl:grid-rows-[1fr]"
+		>
+			<div class="flex min-h-0 flex-col overflow-hidden">
 				<div class="mb-2">
 					<TimelineChart />
 				</div>
-				<div class="mb-2">
-					<ServiceBreakdownChart />
+				<div class="mb-2 grid grid-cols-1 gap-2 md:grid-cols-2">
+					<ServiceSeverityHeatmap />
+					<ServiceEnvHeatmap />
 				</div>
-				<ActiveFilterChips />
-				<div class="flex-1 min-h-0 flex flex-col rounded border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
+				<div class="flex min-h-0 flex-1 flex-col rounded border border-border-default bg-surface-1">
 					<EventStream />
 				</div>
 			</div>
-			{#if selectedId}
-				<div class="min-w-0">
+			<!-- Right sidebar: log detail view (placeholder when no selection) -->
+			<aside
+				class="flex w-full min-w-0 flex-col overflow-hidden rounded border border-border-default bg-surface-1 xl:w-[320px]"
+				aria-label="Log detail view"
+			>
+				{#if selectedId}
 					<DetailPanel eventId={selectedId} />
-				</div>
-			{/if}
+				{:else}
+					<div
+						class="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-text-muted"
+					>
+						<p class="text-sm font-medium text-text-faint">Log detail view</p>
+						<p class="text-xs">Select an event in the stream to see details here.</p>
+					</div>
+				{/if}
+			</aside>
 		</div>
 	</main>
 </div>
