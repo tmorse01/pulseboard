@@ -1,42 +1,71 @@
-# sv
+# Pulseboard
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A professional event/log exploration dashboard built with SvelteKit, TypeScript, and Tailwind CSS. Handles large event volumes (tens/hundreds of thousands) with virtualized scrolling, fast filtering, and visualizations.
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+## Getting Started
 
 ```sh
-# create a new project
-npx sv create my-app
+pnpm install
+pnpm dev
 ```
 
-To recreate this project with the same configuration:
+Then open [http://localhost:5173](http://localhost:5173).
 
-```sh
-# recreate this project
-pnpm dlx sv create --template minimal --types ts --add prettier eslint vitest="usages:unit,component" tailwindcss="plugins:typography,forms" --install pnpm pulseboard
+## Project Structure
+
+```
+src/lib/
+├── components/
+│   ├── app/          # AppShell, OverviewCards
+│   ├── event/        # EventStream, EventRow, DetailPanel
+│   ├── filter/       # FilterBuilder, ActiveFilterChips, SavedViews
+│   └── charts/       # TimelineChart, ServiceBreakdownChart
+├── stores/           # filterState, theme, density, etc.
+├── data/             # eventStore, mockEvents
+└── types/            # Event, Filter, SavedView types
 ```
 
-## Developing
+## Features
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+- **Virtualized event list** – Uses `@humanspeak/svelte-virtual-list` for windowing; only visible rows plus a buffer are rendered, so 100k+ events scroll smoothly.
+- **Live tail mode** – Simulated new events with pause/resume.
+- **Filtering** – Time range, severity, services, environments, text search; filters sync to the URL.
+- **Detail panel** – Summary, raw JSON, related events by trace/request ID; "Add to filter" on field click.
+- **Charts** – Timeline (volume by severity), service breakdown by volume and errors.
+- **Saved views** – Persisted in localStorage.
 
-```sh
-npm run dev
+## Keyboard Shortcuts
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+- `j` / `k` – Move selection up/down
+- `Enter` – Open event details
+- `/` – Focus search
 
-## Building
+## Virtualization
 
-To create a production version of your app:
+The event list uses `@humanspeak/svelte-virtual-list`, which:
 
-```sh
-npm run build
-```
+1. Renders only items in the viewport plus a buffer
+2. Supports dynamic item heights
+3. Keeps memory usage low for large datasets
 
-You can preview the production build with `npm run preview`.
+## Extending to a Real Backend
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+To replace mock data with a real API:
+
+1. **Replace `mockEvents`** – Remove or bypass `generateEvents` and `streamEvents` in `src/lib/data/mockEvents.ts`.
+2. **Replace `eventStore`** – In `src/lib/data/eventStore.ts`:
+   - Replace `datasetStore` with API calls (e.g. `fetch` or a client)
+   - Keep `filteredEvents` derived from `filterState`; either filter client-side or pass filter params to the API
+   - Keep `subscribeToLiveTail` but wire it to WebSocket/SSE instead of the mock timer
+3. **Keep `filterState` and URL sync** – `serializeToUrl` / `parseFromUrl` in `filterState.ts` work for any backend; URL state remains shareable.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start dev server |
+| `pnpm build` | Production build |
+| `pnpm preview` | Preview production build |
+| `pnpm test` | Run Vitest tests |
+| `pnpm check` | Run svelte-check |
+| `pnpm lint` | Run ESLint + Prettier |

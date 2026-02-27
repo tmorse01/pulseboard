@@ -1,3 +1,16 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+:root {
+	--severity-trace: 148 163 184;
+	--severity-debug: 14 165 233;
+	--severity-info: 59 130 246;
+	--severity-warn: 245 158 11;
+	--severity-error: 239 68 68;
+	--severity-fatal: 185 28 28;
+}
+
+.dark {
+	color-scheme: dark;
+}
