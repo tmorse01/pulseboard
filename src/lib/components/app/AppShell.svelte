@@ -14,6 +14,7 @@
 		selectedEventId
 	} from '$lib/stores/index.js';
 	import { getResolvedTheme } from '$lib/stores/theme.js';
+	import { Menu } from '@lucide/svelte';
 
 	let themeValue = $derived($theme);
 	let densityValue = $derived($density);
@@ -58,9 +59,7 @@
 				aria-label="Toggle sidebar"
 				onclick={() => (sidebarOpen = !sidebarOpen)}
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-				</svg>
+				<Menu class="w-5 h-5" aria-hidden="true" />
 			</button>
 			<h1 class="text-lg font-semibold">Pulseboard</h1>
 		</div>

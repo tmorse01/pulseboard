@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { filterState } from '$lib/stores/filterState.js';
+	import { X } from '@lucide/svelte';
 
 	const filter = $filterState;
 
@@ -55,7 +56,7 @@
 					aria-label="Remove severity {sev}"
 					onclick={() => removeSeverity(sev)}
 				>
-					×
+					<X class="w-3.5 h-3.5" aria-hidden="true" />
 				</button>
 			</span>
 		{/each}
@@ -70,7 +71,7 @@
 					aria-label="Remove service {svc}"
 					onclick={() => removeService(svc)}
 				>
-					×
+					<X class="w-3.5 h-3.5" aria-hidden="true" />
 				</button>
 			</span>
 		{/each}
@@ -85,7 +86,7 @@
 					aria-label="Remove env {env}"
 					onclick={() => removeEnv(env)}
 				>
-					×
+					<X class="w-3.5 h-3.5" aria-hidden="true" />
 				</button>
 			</span>
 		{/each}
@@ -100,7 +101,7 @@
 					aria-label="Clear search"
 					onclick={() => filterState.update((s) => ({ ...s, textSearch: '' }))}
 				>
-					×
+					<X class="w-3.5 h-3.5" aria-hidden="true" />
 				</button>
 			</span>
 		{/if}

@@ -2,6 +2,7 @@
 	import type { SavedView } from '$lib/types/filter.js';
 	import { filterState, savedViewId } from '$lib/stores/filterState.js';
 	import { get } from 'svelte/store';
+	import { Star, X, Bookmark } from '@lucide/svelte';
 
 	const STORAGE_KEY = 'pulseboard-saved-views';
 
@@ -64,11 +65,12 @@
 <div class="relative">
 	<button
 		type="button"
-		class="px-3 py-1.5 rounded border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-sm"
+		class="flex items-center gap-2 px-3 py-1.5 rounded border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-sm"
 		onclick={() => (open = !open)}
 		aria-haspopup="listbox"
 		aria-expanded={open}
 	>
+		<Bookmark class="w-4 h-4 shrink-0" aria-hidden="true" />
 		Saved views
 	</button>
 	{#if open}
@@ -99,22 +101,22 @@
 							<span class="text-xs text-neutral-400">(default)</span>
 						{/if}
 					</button>
-					<button
-						type="button"
-						class="text-xs text-neutral-500 hover:text-neutral-700"
-						onclick={() => setDefault(v)}
-						title="Set as default"
-					>
-						★
-					</button>
-					<button
-						type="button"
-						class="text-xs text-red-600 hover:text-red-700"
-						onclick={() => deleteView(v)}
-						aria-label="Delete view"
-					>
-						×
-					</button>
+				<button
+					type="button"
+					class="text-xs text-neutral-500 hover:text-neutral-700"
+					onclick={() => setDefault(v)}
+					title="Set as default"
+				>
+					<Star class="w-4 h-4" aria-hidden="true" />
+				</button>
+				<button
+					type="button"
+					class="text-xs text-red-600 hover:text-red-700 p-0.5"
+					onclick={() => deleteView(v)}
+					aria-label="Delete view"
+				>
+					<X class="w-4 h-4" aria-hidden="true" />
+				</button>
 				</div>
 			{/each}
 			{#if views.length === 0}

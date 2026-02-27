@@ -2,6 +2,7 @@
 	import type { LogEvent } from '$lib/types/event.js';
 	import type { Density } from '$lib/stores/filterState.js';
 	import { selectedEventId } from '$lib/stores/index.js';
+	import { Info, Bug, AlertTriangle, CircleAlert, Skull } from '@lucide/svelte';
 
 	interface Props {
 		event: LogEvent;
@@ -29,6 +30,15 @@
 		error: 'bg-red-500',
 		fatal: 'bg-red-700 dark:bg-red-800'
 	};
+
+	const severityIcons: Record<LogEvent['severity'], typeof Info> = {
+		trace: Info,
+		debug: Bug,
+		info: Info,
+		warn: AlertTriangle,
+		error: CircleAlert,
+		fatal: Skull
+	};
 </script>
 
 <button
@@ -41,11 +51,15 @@
 	onclick={() => selectedEventId.set(event.id)}
 >
 	<div class="flex items-center gap-2 flex-wrap min-w-0">
-		<span
-			class="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium text-white {severityColors[event.severity]}"
-		>
-			{event.severity}
-		</span>
+		{#each [event.severity] as sev}
+			{@const SeverityIcon = severityIcons[sev]}
+			<span
+				class="shrink-0 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium text-white {severityColors[sev]}"
+			>
+				<SeverityIcon class="w-3 h-3 shrink-0" aria-hidden="true" />
+				{sev}
+			</span>
+		{/each}
 		<span class="shrink-0 text-neutral-500 dark:text-neutral-400 text-xs font-mono">
 			{formatTime(event.ts)}
 		</span>

@@ -2,8 +2,10 @@
 	import { filterState } from '$lib/stores/filterState.js';
 	import { SEVERITIES } from '$lib/types/filter.js';
 	import type { TimeRangePreset } from '$lib/types/filter.js';
+	import { Search } from '@lucide/svelte';
 
-	const filter = $filterState;
+	const filter = $derived($filterState);
+
 	let searchInput = $state('');
 	$effect(() => {
 		searchInput = $filterState.textSearch;
@@ -62,10 +64,10 @@
 		{#each (['15m', '1h', '24h'] as const) as preset}
 			<button
 				type="button"
-				class="px-2 py-1 rounded text-sm border {filter.timeRange.type === 'preset' &&
+				class="px-2 py-1 rounded text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 {filter.timeRange.type === 'preset' &&
 				filter.timeRange.preset === preset
-					? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-					: 'border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
+					? 'border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+					: 'border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
 				onclick={() => setTimePreset(preset)}
 			>
 				{preset}
@@ -74,24 +76,30 @@
 	</div>
 
 	<h2 class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 pt-2">Search</h2>
-	<input
-		id="pulseboard-search"
-		type="search"
-		placeholder="Search messages..."
-		class="w-full px-3 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400"
-		bind:value={searchInput}
-		oninput={(e) => updateSearch((e.target as HTMLInputElement).value)}
-		aria-label="Search events"
-	/>
+	<div class="relative">
+		<Search
+			class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none"
+			aria-hidden="true"
+		/>
+		<input
+			id="pulseboard-search"
+			type="search"
+			placeholder="Search messages..."
+			class="w-full pl-10 pr-3 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400"
+			bind:value={searchInput}
+			oninput={(e) => updateSearch((e.target as HTMLInputElement).value)}
+			aria-label="Search events"
+		/>
+	</div>
 
 	<h2 class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 pt-2">Severity</h2>
 	<div class="flex flex-wrap gap-1">
 		{#each SEVERITIES as sev}
 			<button
 				type="button"
-				class="px-2 py-1 rounded text-xs border {filter.severities.includes(sev)
-					? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
-					: 'border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
+				class="px-2 py-1 rounded text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 {filter.severities.includes(sev)
+					? 'border-2 border-amber-500 bg-amber-50 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200'
+					: 'border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
 				onclick={() => toggleSeverity(sev)}
 			>
 				{sev}
@@ -104,9 +112,9 @@
 		{#each SERVICES as svc}
 			<button
 				type="button"
-				class="px-2 py-1 rounded text-xs border {filter.services.includes(svc)
-					? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-					: 'border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
+				class="px-2 py-1 rounded text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 {filter.services.includes(svc)
+					? 'border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+					: 'border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
 				onclick={() => toggleService(svc)}
 			>
 				{svc}
@@ -119,9 +127,9 @@
 		{#each ENVS as env}
 			<button
 				type="button"
-				class="px-2 py-1 rounded text-xs border {filter.environments.includes(env)
-					? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-					: 'border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
+				class="px-2 py-1 rounded text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 {filter.environments.includes(env)
+					? 'border-2 border-sky-500 bg-sky-50 dark:bg-sky-900/40 text-sky-800 dark:text-sky-200'
+					: 'border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'}"
 				onclick={() => toggleEnv(env)}
 			>
 				{env}
