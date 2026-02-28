@@ -1,4 +1,4 @@
-import type { LogEvent, Severity } from '$lib/types/event.js';
+import type { LogEvent } from '$lib/types/event.js';
 import type { FieldFilter, FilterState, TimeRangePreset } from '$lib/types/filter.js';
 import { generateEvents, streamEvents } from './mockEvents.js';
 import { writable, derived, get } from 'svelte/store';
@@ -102,6 +102,14 @@ function filterEvents(events: LogEvent[], state: FilterState): LogEvent[] {
 	return result;
 }
 
+/** Merge incoming events into existing list by id (incoming wins), then sort by ts descending. */
+function mergeEventsByIdAndTs(existing: LogEvent[], incoming: LogEvent[]): LogEvent[] {
+	const byId = new Map<string, LogEvent>();
+	for (const e of existing) byId.set(e.id, e);
+	for (const e of incoming) byId.set(e.id, e);
+	return [...byId.values()].sort((a, b) => b.ts - a.ts);
+}
+
 /** Initial dataset: 100k events spanning last 24h */
 const INITIAL_END = Date.now();
 const INITIAL_START = INITIAL_END - 24 * 60 * 60 * 1000;
@@ -127,14 +135,14 @@ export function getPaginatedSlice(
 
 let stopLiveTail: (() => void) | null = null;
 
-/** Subscribe to live tail simulation. New events are appended to datasetStore. Returns unsubscribe. */
+/** Subscribe to live tail simulation. New events are merged into datasetStore by id/ts. Returns unsubscribe. */
 export function subscribeToLiveTail(
 	opts: { intervalMs?: number } = {}
 ): () => void {
 	if (stopLiveTail) stopLiveTail();
 	stopLiveTail = streamEvents(
-		(event) => {
-			datasetStore.update((arr) => [...arr, event]);
+		(batch) => {
+			datasetStore.update((arr) => mergeEventsByIdAndTs(arr, batch));
 		},
 		opts.intervalMs ?? 2000
 	);

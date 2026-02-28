@@ -43,6 +43,7 @@
 
 <button
 	type="button"
+	data-event-id={event.id}
 	class="w-full text-left px-3 border-b border-border-soft transition-colors {isSelected
 		? 'bg-selected-bg border-l-4 border-l-selected-border'
 		: 'hover:bg-hover-surface'} {densityProp === 'compact'

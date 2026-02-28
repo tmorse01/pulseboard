@@ -26,11 +26,11 @@ export function generateEvents(count: number, startTs: number, seed = 42): LogEv
 let liveTailInterval: ReturnType<typeof setInterval> | null = null;
 
 /**
- * Simulate live tail: emit 1–3 trace-correlated events per tick using the same
- * service templates. Returns stop function.
+ * Simulate live tail: emit a batch of trace-correlated events per tick.
+ * Uses 8–30 traces per tick for a heavier burst. Returns stop function.
  */
 export function streamEvents(
-	callback: (event: LogEvent) => void,
+	callback: (events: LogEvent[]) => void,
 	intervalMs = 2000,
 	seed = 99
 ): () => void {
@@ -39,15 +39,16 @@ export function streamEvents(
 
 	const tick = () => {
 		const now = Date.now();
-		// 1–3 traces per tick (trace-aware burst)
-		const numTraces = 1 + Math.floor(rng() * 3);
+		// 8–30 traces per tick (cranked up for burst)
+		const numTraces = 8 + Math.floor(rng() * 23);
 		const windowStart = now - 5000;
 		const traceDefs = generateTraceDefs(numTraces, windowStart, now + 100, seed + counter * 1000);
 		const eventIdPrefix = `live-${now}`;
+		const batch: LogEvent[] = [];
 		for (const trace of traceDefs) {
 			const events = traceToEvents(trace, eventIdPrefix, rng);
 			for (const ev of events) {
-				callback({
+				batch.push({
 					...ev,
 					id: `${ev.id}-${counter}`,
 					ts: now + counter
@@ -55,6 +56,7 @@ export function streamEvents(
 				counter++;
 			}
 		}
+		if (batch.length > 0) callback(batch);
 	};
 
 	liveTailInterval = setInterval(tick, intervalMs);

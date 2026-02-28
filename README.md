@@ -27,7 +27,7 @@ src/lib/
 
 ## Features
 
-- **Virtualized event list** – Uses `@humanspeak/svelte-virtual-list` for windowing; only visible rows plus a buffer are rendered, so 100k+ events scroll smoothly.
+- **Virtualized event list** – Uses [virtua](https://github.com/inokawa/virtua) (`virtua/svelte` VList) for windowing; only visible rows are rendered, so 100k+ events scroll smoothly. Scroll preservation keeps the same anchor event in view when new events are prepended (e.g. live tail) via `shift={true}` and anchor-by-id adjustment.
 - **Live tail mode** – Simulated new events with pause/resume.
 - **Filtering** – Time range, severity, services, environments, text search; filters sync to the URL.
 - **Detail panel** – Summary, raw JSON, related events by trace/request ID; "Add to filter" on field click.
@@ -42,11 +42,13 @@ src/lib/
 
 ## Virtualization
 
-The event list uses `@humanspeak/svelte-virtual-list`, which:
+The event list uses [virtua](https://github.com/inokawa/virtua) (VList from `virtua/svelte`), which:
 
-1. Renders only items in the viewport plus a buffer
-2. Supports dynamic item heights
-3. Keeps memory usage low for large datasets
+1. Renders only items in the viewport (Svelte 5–native, zero-config)
+2. Uses fixed item size per density (compact/comfortable) and supports dynamic sizing
+3. Keeps memory usage low for large datasets (~3kB gzipped)
+
+Scroll preservation uses Virtua’s `shift={true}` (maintains position when items are added at the start) plus anchor-by-id logic when the list grows so the same logical event stays in view.
 
 ## Extending to a Real Backend
 

@@ -13,11 +13,13 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test:unit": "vitest",
+		"test:e2e": "playwright test",
 		"test": "npm run test:unit -- --run"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.0.2",
 		"@eslint/js": "^9.39.2",
+		"@playwright/test": "^1.58.2",
 		"@sveltejs/adapter-auto": "^7.0.0",
 		"@sveltejs/kit": "^2.50.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
@@ -42,8 +44,8 @@
 	},
 	"packageManager": "pnpm@10.30.1+sha512.3590e550d5384caa39bd5c7c739f72270234b2f6059e13018f975c313b1eb9fefcc09714048765d4d9efe961382c312e624572c0420762bdc5d5940cdf9be73a",
 	"dependencies": {
-		"@humanspeak/svelte-virtual-list": "^0.4.1",
 		"@lucide/svelte": "^0.575.0",
-		"layercake": "^10.0.2"
+		"layercake": "^10.0.2",
+		"virtua": "^0.46.0"
 	}
 }

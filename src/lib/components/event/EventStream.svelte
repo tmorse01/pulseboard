@@ -1,19 +1,69 @@
 <script lang="ts">
-	import SvelteVirtualList from '@humanspeak/svelte-virtual-list';
+	import { VList } from 'virtua/svelte';
 	import type { LogEvent } from '$lib/types/event.js';
+	import type { VListHandle } from 'virtua/svelte';
 	import { filteredEvents, subscribeToLiveTail } from '$lib/data/eventStore.js';
 	import { density, liveTailPaused, filterState } from '$lib/stores/index.js';
+	import {
+		computeScrollPreservation,
+		type ScrollPreservationState
+	} from '$lib/scrollPreservation.js';
 	import EventRow from './EventRow.svelte';
 	import { FilterX } from '@lucide/svelte';
 
 	const events = $derived($filteredEvents);
 	const densityValue = $derived($density);
 	const paused = $derived($liveTailPaused);
+	const estimatedRowHeight = $derived(densityValue === 'compact' ? 32 : 40);
 
-	let listRef = $state<import('@humanspeak/svelte-virtual-list').default<LogEvent> | undefined>(
-		undefined
-	);
+	let listHandle = $state<VListHandle | null>(null);
 	let liveTailUnsub: (() => void) | undefined;
+
+	/** Kept in sync via onscroll so we have the correct anchor when list length changes. */
+	let scrollInfo = $state({ scrollTop: 0, startIndex: 0 });
+
+	// Non-reactive: effect reads/writes this; must not be $state or we get effect_update_depth_exceeded.
+	let scrollState: ScrollPreservationState = {
+		anchorId: null,
+		firstVisibleIndex: 0,
+		scrollTop: 0,
+		eventsLength: 0
+	};
+
+	function handleScroll(offset: number) {
+		const handle = listHandle;
+		if (handle) {
+			scrollInfo = { scrollTop: offset, startIndex: handle.findStartIndex() };
+		}
+	}
+
+	$effect(() => {
+		const list = events;
+		const handle = listHandle;
+		if (!handle || list.length === 0) return;
+
+		// Use scrollInfo (updated by onscroll) so we react to user scroll and have correct anchor.
+		// Fall back to handle when scrollInfo not yet synced (e.g. initial load).
+		const currentScrollTop = scrollInfo.scrollTop;
+		const firstVisibleIndexFromDOM = scrollInfo.startIndex;
+
+		const result = computeScrollPreservation({
+			list,
+			currentScrollTop,
+			estimatedRowHeight,
+			prev: scrollState,
+			firstVisibleIndexFromDOM
+		});
+
+		if (result.shouldAdjust && result.newScrollTop != null) {
+			const targetScroll = result.newScrollTop;
+			queueMicrotask(() => {
+				handle.scrollTo(targetScroll);
+			});
+		}
+
+		scrollState = result.nextState;
+	});
 
 	$effect(() => {
 		if (paused && liveTailUnsub) {
@@ -61,15 +111,20 @@
 			</button>
 		</div>
 	{:else}
-		<SvelteVirtualList
-			bind:this={listRef}
-			items={events}
-			defaultEstimatedItemHeight={densityValue === 'compact' ? 32 : 40}
-			containerClass="virtual-list-container flex-1 min-h-0"
-		>
-			{#snippet renderItem(event, index)}
-				<EventRow {event} density={densityValue} />
-			{/snippet}
-		</SvelteVirtualList>
+		<div class="flex min-h-0 flex-1 flex-col" data-testid="event-list-viewport">
+			<VList
+				data={events}
+				itemSize={estimatedRowHeight}
+				shift={true}
+				getKey={(e) => e.id}
+				bind:this={listHandle}
+				onscroll={handleScroll}
+				style="height: 100%;"
+			>
+				{#snippet children(item, _index)}
+					<EventRow event={item} density={densityValue} />
+				{/snippet}
+			</VList>
+		</div>
 	{/if}
 </div>
