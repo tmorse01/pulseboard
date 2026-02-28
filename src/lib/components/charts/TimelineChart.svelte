@@ -99,11 +99,16 @@
 	}
 
 	// Precompute rects: include active flag; use displayBounds for positioning
+	// Use a floor and ceiling on effective max so: bars don't shrink to nothing on bursts, and bars never draw off screen
+	const CHART_HEIGHT = 64;
+	const MIN_EFFECTIVE_MAX = 8;   // floor so low counts don't look flat
+	const MAX_EFFECTIVE_MAX = 64;  // ceiling so scale >= 1px/event and bars stay on screen (then we cap height)
 	const rects = $derived.by(() => {
 		const { start, end } = displayBounds;
 		const n = buckets.length;
 		const step = n > 0 ? (end - start) / n : 0;
-		const scale = maxStack > 0 ? 64 / maxStack : 0;
+		const effectiveMax = Math.max(MIN_EFFECTIVE_MAX, Math.min(maxStack, MAX_EFFECTIVE_MAX));
+		const scale = effectiveMax > 0 ? CHART_HEIGHT / effectiveMax : 0;
 		const w = Math.max(1, 400 / Math.max(1, buckets.length));
 		return buckets.map((bucket, i) => {
 			const x = (i / Math.max(1, buckets.length - 1)) * 400;
@@ -115,6 +120,17 @@
 					const h = count * scale;
 					segments.push({ sev, y: y - h, h });
 					y -= h;
+				}
+			}
+			// Cap total bar height at CHART_HEIGHT so bars never draw off screen
+			const totalH = 70 - y;
+			if (totalH > CHART_HEIGHT && segments.length > 0) {
+				const factor = CHART_HEIGHT / totalH;
+				let yy = 70;
+				for (const seg of segments) {
+					seg.h *= factor;
+					seg.y = yy - seg.h;
+					yy -= seg.h;
 				}
 			}
 			const bucketStart = start + i * step;
