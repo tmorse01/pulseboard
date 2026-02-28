@@ -151,6 +151,7 @@ export function traceToEvents(
 			service: call.service,
 			env: trace.env,
 			message: template.message,
+			...(template.description != null && { description: template.description }),
 			traceId: trace.traceId,
 			requestId: trace.requestId,
 			durationMs: topLevelDuration,

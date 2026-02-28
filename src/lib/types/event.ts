@@ -7,6 +7,8 @@ export interface LogEvent {
 	service: string;
 	env: string;
 	message: string;
+	/** Optional longer description or context for the event */
+	description?: string;
 	traceId?: string;
 	requestId?: string;
 	durationMs?: number;

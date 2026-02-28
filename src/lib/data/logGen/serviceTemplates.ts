@@ -3,6 +3,8 @@ import type { Service } from './distributions.js';
 
 export interface ServiceCallTemplate {
 	message: string;
+	/** Optional description shown next to message in the event log */
+	description?: string;
 	severity: Severity;
 	attrs: Record<string, unknown>;
 	durationMsRange?: [number, number];
@@ -93,6 +95,7 @@ export function templateFor(
 		const severity: Severity = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : rng() < 0.1 ? 'debug' : 'info';
 		return {
 			message,
+			description: statusCode >= 400 ? `HTTP ${statusCode} for ${method} ${path}` : undefined,
 			severity: opts?.forceError ? 'error' : opts?.forceWarn ? 'warn' : severity,
 			attrs: {
 				...base,
@@ -118,6 +121,7 @@ export function templateFor(
 		const durationMs = a.severity === 'error' ? 100 + rng() * 50 : 5 + rng() * 20;
 		return {
 			message: a.message,
+			description: a.severity === 'error' ? 'Authentication failed for the given credentials' : undefined,
 			severity: opts?.forceError ? 'error' : opts?.forceWarn ? 'warn' : a.severity,
 			attrs: {
 				...base,
@@ -142,6 +146,7 @@ export function templateFor(
 		const severity: Severity = isExhausted ? 'error' : isSlow ? 'warn' : rng() < 0.08 ? 'debug' : 'info';
 		return {
 			message,
+			description: isExhausted ? 'All connections in the pool are in use' : isSlow ? `Query exceeded threshold (${durationMs}ms)` : undefined,
 			severity: opts?.forceError && isExhausted ? 'error' : severity,
 			attrs: {
 				...base,

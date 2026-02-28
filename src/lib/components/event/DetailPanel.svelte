@@ -57,9 +57,7 @@
 	}
 
 	const relatedByTrace = $derived(
-		event?.traceId
-			? events.filter((e) => e.id !== event.id && e.traceId === event.traceId)
-			: []
+		event?.traceId ? events.filter((e) => e.id !== event.id && e.traceId === event.traceId) : []
 	);
 	const relatedByRequest = $derived(
 		event?.requestId
@@ -102,26 +100,26 @@
 
 {#if event}
 	<div
-		class="h-full flex flex-col rounded border border-border-default bg-surface-1 overflow-hidden"
+		class="flex h-full flex-col overflow-hidden rounded border border-border-default bg-surface-1"
 		role="complementary"
 		aria-label="Event details"
 	>
 		<div class="flex items-center justify-between border-b border-border-default px-3 py-2">
-			<h3 class="font-semibold text-sm">Event details</h3>
+			<h3 class="text-sm font-semibold">Event details</h3>
 			<button
 				type="button"
-				class="p-1 rounded hover:bg-hover-surface"
+				class="rounded p-1 hover:bg-hover-surface"
 				aria-label="Close"
 				onclick={() => selectedEventId.set(null)}
 			>
-				<X class="w-5 h-5" aria-hidden="true" />
+				<X class="h-5 w-5" aria-hidden="true" />
 			</button>
 		</div>
 		<div class="flex border-b border-border-default">
-			{#each (['summary', 'raw', 'related', 'attributes'] as const) as t}
+			{#each ['summary', 'raw', 'related', 'attributes'] as const as t}
 				<button
 					type="button"
-					class="px-3 py-2 text-sm font-medium border-b-2 {tab === t
+					class="border-b-2 px-3 py-2 text-sm font-medium {tab === t
 						? 'border-brand-primary text-brand-primary'
 						: 'border-transparent text-text-muted hover:text-text-primary'}"
 					onclick={() => (tab = t)}
@@ -134,15 +132,15 @@
 			{#if tab === 'summary'}
 				<div class="space-y-0">
 					<section class="pb-4">
-						<h2 class="text-base font-semibold text-text-primary mb-3">Time & identifiers</h2>
+						<h2 class="mb-3 text-base font-semibold text-text-primary">Time & identifiers</h2>
 						<dl class="space-y-2">
 							<div>
-								<dt class="text-text-muted text-xs">Timestamp</dt>
+								<dt class="text-xs text-text-muted">Timestamp</dt>
 								<dd class="font-mono">{new Date(event.ts).toISOString()}</dd>
 							</div>
 							{#if event.traceId}
 								<div>
-									<dt class="text-text-muted text-xs">Trace ID</dt>
+									<dt class="text-xs text-text-muted">Trace ID</dt>
 									<dd>
 										<button
 											type="button"
@@ -156,7 +154,7 @@
 							{/if}
 							{#if event.requestId}
 								<div>
-									<dt class="text-text-muted text-xs">Request ID</dt>
+									<dt class="text-xs text-text-muted">Request ID</dt>
 									<dd>
 										<button
 											type="button"
@@ -170,7 +168,7 @@
 							{/if}
 							{#if event.userId}
 								<div>
-									<dt class="text-text-muted text-xs">User ID</dt>
+									<dt class="text-xs text-text-muted">User ID</dt>
 									<dd class="font-mono">{event.userId}</dd>
 								</div>
 							{/if}
@@ -178,10 +176,10 @@
 					</section>
 					<div class="border-t border-border-default" aria-hidden="true"></div>
 					<section class="py-4">
-						<h2 class="text-base font-semibold text-text-primary mb-3">Service & environment</h2>
+						<h2 class="mb-3 text-base font-semibold text-text-primary">Service & environment</h2>
 						<dl class="space-y-2">
 							<div>
-								<dt class="text-text-muted text-xs">Service</dt>
+								<dt class="text-xs text-text-muted">Service</dt>
 								<dd>
 									<button
 										type="button"
@@ -193,7 +191,7 @@
 								</dd>
 							</div>
 							<div>
-								<dt class="text-text-muted text-xs">Environment</dt>
+								<dt class="text-xs text-text-muted">Environment</dt>
 								<dd>
 									<button
 										type="button"
@@ -205,7 +203,7 @@
 								</dd>
 							</div>
 							<div>
-								<dt class="text-text-muted text-xs">Severity</dt>
+								<dt class="text-xs text-text-muted">Severity</dt>
 								<dd>
 									<button
 										type="button"
@@ -220,99 +218,149 @@
 					</section>
 					<div class="border-t border-border-default" aria-hidden="true"></div>
 					<section class="pt-4">
-						<h2 class="text-base font-semibold text-text-primary mb-3">Message</h2>
+						<h2 class="mb-3 text-base font-semibold text-text-primary">Message</h2>
 						<p class="wrap-break-word text-text-primary">{event.message}</p>
 					</section>
+					{#if event.description}
+						<section class="pt-4">
+							<p class="mt-2 text-sm wrap-break-word text-text-muted">{event.description}</p>
+						</section>
+					{/if}
 				</div>
 			{:else if tab === 'raw'}
 				<section>
-					<h2 class="text-base font-semibold text-text-primary mb-3 pb-2 border-b border-border-default">Raw event</h2>
+					<h2
+						class="mb-3 border-b border-border-default pb-2 text-base font-semibold text-text-primary"
+					>
+						Raw event
+					</h2>
 					<pre
-						class="mt-3 text-xs font-mono overflow-auto rounded bg-bg-subtle p-2 whitespace-pre-wrap break-all"
-					>{JSON.stringify(event, null, 2)}</pre>
+						class="mt-3 overflow-auto rounded bg-bg-subtle p-2 font-mono text-xs break-all whitespace-pre-wrap">{JSON.stringify(
+							event,
+							null,
+							2
+						)}</pre>
 				</section>
 			{:else if tab === 'related'}
 				<div class="space-y-0">
 					<section class="pb-4">
-						<h2 class="text-base font-semibold text-text-primary mb-3">Overview</h2>
+						<h2 class="mb-3 text-base font-semibold text-text-primary">Overview</h2>
 						<div class="flex flex-wrap gap-2">
-						{#if traceGroupSummary}
-							{#if traceGroupSummary.type === 'group'}
-								<span
-									class="inline-flex items-center gap-1.5 rounded-full bg-brand-primary/15 text-brand-primary px-2.5 py-1 text-xs font-medium"
-									title="Part of a multi-event trace"
-								>
-									<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-									</svg>
-									Trace group ({traceGroupSummary.total} events)
-								</span>
-							{:else}
-								<span
-									class="inline-flex items-center gap-1.5 rounded-full bg-bg-subtle text-text-muted px-2.5 py-1 text-xs font-medium"
-									title="Only event in this trace"
-								>
-									<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-									</svg>
-									One-off trace
-								</span>
+							{#if traceGroupSummary}
+								{#if traceGroupSummary.type === 'group'}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full bg-brand-primary/15 px-2.5 py-1 text-xs font-medium text-brand-primary"
+										title="Part of a multi-event trace"
+									>
+										<svg
+											class="h-3.5 w-3.5"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+											aria-hidden="true"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+											/>
+										</svg>
+										Trace group ({traceGroupSummary.total} events)
+									</span>
+								{:else}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full bg-bg-subtle px-2.5 py-1 text-xs font-medium text-text-muted"
+										title="Only event in this trace"
+									>
+										<svg
+											class="h-3.5 w-3.5"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+											aria-hidden="true"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+											/>
+										</svg>
+										One-off trace
+									</span>
+								{/if}
 							{/if}
-						{/if}
-						{#if requestGroupSummary}
-							{#if requestGroupSummary.type === 'group'}
-								<span
-									class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 text-xs font-medium"
-									title="Part of a multi-request group"
-								>
-									<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-									</svg>
-									Request group ({requestGroupSummary.total} events)
-								</span>
-							{:else}
-								<span
-									class="inline-flex items-center gap-1.5 rounded-full bg-bg-subtle text-text-muted px-2.5 py-1 text-xs font-medium"
-									title="Only event with this request ID"
-								>
-									One-off request
-								</span>
+							{#if requestGroupSummary}
+								{#if requestGroupSummary.type === 'group'}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400"
+										title="Part of a multi-request group"
+									>
+										<svg
+											class="h-3.5 w-3.5"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+											aria-hidden="true"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M4 6h16M4 10h16M4 14h16M4 18h16"
+											/>
+										</svg>
+										Request group ({requestGroupSummary.total} events)
+									</span>
+								{:else}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full bg-bg-subtle px-2.5 py-1 text-xs font-medium text-text-muted"
+										title="Only event with this request ID"
+									>
+										One-off request
+									</span>
+								{/if}
 							{/if}
-						{/if}
-						{#if !traceGroupSummary && !requestGroupSummary}
-							<p class="text-text-muted text-sm">No trace or request ID on this event.</p>
-						{/if}
+							{#if !traceGroupSummary && !requestGroupSummary}
+								<p class="text-sm text-text-muted">No trace or request ID on this event.</p>
+							{/if}
 						</div>
 					</section>
 
 					{#if event?.traceId}
 						<div class="border-t border-border-default" aria-hidden="true"></div>
 						<section class="py-4">
-							<h2 class="text-base font-semibold text-text-primary mb-3">By trace ID</h2>
-							<p class="text-text-muted text-xs font-mono mb-2">{event.traceId}</p>
+							<h2 class="mb-3 text-base font-semibold text-text-primary">By trace ID</h2>
+							<p class="mb-2 font-mono text-xs text-text-muted">{event.traceId}</p>
 							{#if relatedByTrace.length === 0}
-								<p class="text-text-muted text-sm py-1">No other events in this trace.</p>
+								<p class="py-1 text-sm text-text-muted">No other events in this trace.</p>
 							{:else}
 								<ul class="space-y-1">
 									{#each relatedByTrace.slice(0, 25) as rel}
 										<li>
 											<button
 												type="button"
-												class="text-left w-full px-2 py-1.5 rounded hover:bg-hover-surface text-xs flex items-center gap-2 flex-wrap"
+												class="flex w-full flex-wrap items-center gap-2 rounded px-2 py-1.5 text-left text-xs hover:bg-hover-surface"
 												onclick={() => selectedEventId.set(rel.id)}
 											>
-												<span class="rounded bg-brand-primary/15 text-brand-primary px-1.5 py-0.5 text-[10px] font-medium shrink-0">trace</span>
-												<span class="text-text-faint shrink-0">{new Date(rel.ts).toISOString()}</span>
+												<span
+													class="shrink-0 rounded bg-brand-primary/15 px-1.5 py-0.5 text-[10px] font-medium text-brand-primary"
+													>trace</span
+												>
+												<span class="shrink-0 text-text-faint"
+													>{new Date(rel.ts).toISOString()}</span
+												>
 												{#if rel.service}
-													<span class="font-medium text-text-muted shrink-0">{rel.service}</span>
+													<span class="shrink-0 font-medium text-text-muted">{rel.service}</span>
 												{/if}
-												<span class="truncate min-w-0">{rel.message}</span>
+												<span class="min-w-0 truncate">{rel.message}</span>
 											</button>
 										</li>
 									{/each}
 								</ul>
 								{#if relatedByTrace.length > 25}
-									<p class="text-xs text-text-faint mt-1">+{relatedByTrace.length - 25} more</p>
+									<p class="mt-1 text-xs text-text-faint">+{relatedByTrace.length - 25} more</p>
 								{/if}
 							{/if}
 						</section>
@@ -321,31 +369,41 @@
 					{#if event?.requestId}
 						<div class="border-t border-border-default" aria-hidden="true"></div>
 						<section class="py-4">
-							<h2 class="text-base font-semibold text-text-primary mb-3">By request ID</h2>
-							<p class="text-text-muted text-xs font-mono truncate max-w-48 mb-2" title={event.requestId}>{event.requestId}</p>
+							<h2 class="mb-3 text-base font-semibold text-text-primary">By request ID</h2>
+							<p
+								class="mb-2 max-w-48 truncate font-mono text-xs text-text-muted"
+								title={event.requestId}
+							>
+								{event.requestId}
+							</p>
 							{#if relatedByRequest.length === 0}
-								<p class="text-text-muted text-sm py-1">No other events with this request ID.</p>
+								<p class="py-1 text-sm text-text-muted">No other events with this request ID.</p>
 							{:else}
 								<ul class="space-y-1">
 									{#each relatedByRequest.slice(0, 25) as rel}
 										<li>
 											<button
 												type="button"
-												class="text-left w-full px-2 py-1.5 rounded hover:bg-hover-surface text-xs flex items-center gap-2 flex-wrap"
+												class="flex w-full flex-wrap items-center gap-2 rounded px-2 py-1.5 text-left text-xs hover:bg-hover-surface"
 												onclick={() => selectedEventId.set(rel.id)}
 											>
-												<span class="rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[10px] font-medium shrink-0">request</span>
-												<span class="text-text-faint shrink-0">{new Date(rel.ts).toISOString()}</span>
+												<span
+													class="shrink-0 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
+													>request</span
+												>
+												<span class="shrink-0 text-text-faint"
+													>{new Date(rel.ts).toISOString()}</span
+												>
 												{#if rel.service}
-													<span class="font-medium text-text-muted shrink-0">{rel.service}</span>
+													<span class="shrink-0 font-medium text-text-muted">{rel.service}</span>
 												{/if}
-												<span class="truncate min-w-0">{rel.message}</span>
+												<span class="min-w-0 truncate">{rel.message}</span>
 											</button>
 										</li>
 									{/each}
 								</ul>
 								{#if relatedByRequest.length > 25}
-									<p class="text-xs text-text-faint mt-1">+{relatedByRequest.length - 25} more</p>
+									<p class="mt-1 text-xs text-text-faint">+{relatedByRequest.length - 25} more</p>
 								{/if}
 							{/if}
 						</section>
@@ -353,15 +411,23 @@
 				</div>
 			{:else if tab === 'attributes'}
 				<section>
-					<h2 class="text-base font-semibold text-text-primary mb-3 pb-2 border-b border-border-default">Custom attributes</h2>
+					<h2
+						class="mb-3 border-b border-border-default pb-2 text-base font-semibold text-text-primary"
+					>
+						Custom attributes
+					</h2>
 					{#if attrEntries.length === 0}
-						<p class="text-text-muted text-sm mt-3">No custom attributes on this event.</p>
+						<p class="mt-3 text-sm text-text-muted">No custom attributes on this event.</p>
 					{:else}
 						<dl class="mt-3 space-y-2">
 							{#each attrEntries as [key, value]}
 								<div class="rounded bg-bg-subtle/50 px-2 py-1.5">
-									<dt class="text-text-muted text-xs font-medium truncate" title={key}>{key}</dt>
-									<dd class="font-mono text-xs mt-0.5 break-all whitespace-pre-wrap wrap-break-word">{formatAttrValue(value)}</dd>
+									<dt class="truncate text-xs font-medium text-text-muted" title={key}>{key}</dt>
+									<dd
+										class="mt-0.5 font-mono text-xs wrap-break-word break-all whitespace-pre-wrap"
+									>
+										{formatAttrValue(value)}
+									</dd>
 								</div>
 							{/each}
 						</dl>
@@ -371,5 +437,5 @@
 		</div>
 	</div>
 {:else}
-	<div class="p-4 text-text-muted text-sm">Event not found.</div>
+	<div class="p-4 text-sm text-text-muted">Event not found.</div>
 {/if}
